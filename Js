@@ -1,0 +1,432 @@
+// Data Dummy (Simulasi Database)
+let farmers = [
+    { id: "F001", name: "Budi Santoso", seed: "Padi Organik", land: "1 ha" },
+    { id: "F002", name: "Siti Aminah", seed: "Jagung Lokal", land: "0.5 ha" }
+];
+
+let lands = [
+    { id: "L001", location: "Desa Waikabubak", area: 1, type: "Latosol", farmerId: "F001", status: "Milik" },
+    { id: "L002", location: "Desa Lamboya", area: 0.5, type: "Regosol", farmerId: "F002", status: "Sewa" }
+];
+
+let progressData = [
+    {
+        farmerId: "F001",
+        landId: "L001",
+        stage: "Penanaman",
+        date: "2025-05-01",
+        description: "Biji padi organik ditanam di lahan 1 hektar.",
+        photo: "https://via.placeholder.com/300x200?text=Penanaman+Padi"
+    },
+    {
+        farmerId: "F001",
+        landId: "L001",
+        stage: "Pemupukan",
+        date: "2025-06-15",
+        description: "Pupuk organik kompos diberikan, tanaman setinggi 30 cm.",
+        photo: "https://via.placeholder.com/300x200?text=Pemupukan+Padi"
+    }
+];
+
+let products = [
+    {
+        id: "PROD001",
+        name: "Padi Organik",
+        price: 15000,
+        quantity: 1000,
+        farmerId: "F001",
+        landId: "L001",
+        qrCode: "https://via.placeholder.com/150?text=QR+Padi",
+        blockchainHash: "0xabc123..."
+    },
+    {
+        id: "PROD002",
+        name: "Jagung Lokal",
+        price: 10000,
+        quantity: 500,
+        farmerId: "F002",
+        landId: "L002",
+        qrCode: "https://via.placeholder.com/150?text=QR+Jagung",
+        blockchainHash: "0xdef456..."
+    }
+];
+
+let transactions = [
+    {
+        id: "TX001",
+        product: "500 kg Padi Organik",
+        buyer: "PT AgriJaya",
+        farmerId: "F001",
+        landId: "L001",
+        hash: "0xabc123...",
+        date: "1 September 2025",
+        explorerLink: "https://polygonscan.com/tx/0xabc123"
+    }
+];
+
+let chats = [
+    {
+        farmerId: "F001",
+        buyer: "Pembeli1",
+        message: "Apa padi organiknya bebas pestisida?",
+        timestamp: "2025-09-01 10:00"
+    }
+];
+
+let currentBuyer = null;
+
+// Simulasi Database Pengguna (Login)
+const users = [
+    { username: "pembeli1", password: "pass123" },
+    { username: "pembeli2", password: "pass456" }
+];
+
+// Inisialisasi Chart.js untuk Data Tanah
+const ctx = document.getElementById('soilChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['pH', 'Kelembapan', 'Nitrogen', 'Fosfor', 'Kalium'],
+        datasets: [{
+            label: 'Data Tanah',
+            data: [6.5, 70, 20, 15, 25],
+            backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#dc3545', '#6f42c1'],
+            borderColor: ['#218838', '#138496', '#e0a800', '#c82333', '#5a32a3'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
+    }
+});
+
+// Render Daftar Lahan
+function renderLands() {
+    const tableBody = document.getElementById('landTable');
+    tableBody.innerHTML = '';
+    lands.forEach(land => {
+        const farmer = farmers.find(f => f.id === land.farmerId);
+        tableBody.innerHTML += `
+            <tr>
+                <td>${land.location}</td>
+                <td>${land.area} ha</td>
+                <td>${land.type}</td>
+                <td>${farmer ? farmer.name : '-'}</td>
+                <td>${land.status}</td>
+                <td><button class="btn btn-sm btn-info" onclick="viewLand('${land.id}')">Detail</button></td>
+            </tr>
+        `;
+    });
+    // Update dropdown lahan
+    const landFarmer = document.getElementById('landFarmer');
+    const uploadLand = document.getElementById('uploadLand');
+    const progressLand = document.getElementById('progressLand');
+    landFarmer.innerHTML = '<option value="">Pilih Petani</option>';
+    farmers.forEach(farmer => {
+        landFarmer.innerHTML += `<option value="${farmer.id}">${farmer.name}</option>`;
+    });
+    uploadLand.innerHTML = '<option value="">Pilih Lahan</option>';
+    progressLand.innerHTML = '<option value="">Pilih Lahan</option>';
+    lands.forEach(land => {
+        const farmer = farmers.find(f => f.id === land.farmerId);
+        uploadLand.innerHTML += `<option value="${land.id}">${land.location} (${farmer ? farmer.name : '-'})</option>`;
+        progressLand.innerHTML += `<option value="${land.id}">${land.location} (${farmer ? farmer.name : '-'})</option>`;
+    });
+}
+
+// Render Daftar Petani
+function renderFarmers() {
+    const tableBody = document.getElementById('farmerTable');
+    tableBody.innerHTML = '';
+    farmers.forEach(farmer => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${farmer.name}</td>
+                <td>${farmer.seed}</td>
+                <td>${farmer.land}</td>
+                <td><button class="btn btn-sm btn-info" onclick="viewProgress('${farmer.id}')">Lihat Progres</button></td>
+            </tr>
+        `;
+    });
+    // Update dropdown petani
+    const uploadFarmer = document.getElementById('uploadFarmer');
+    const progressFarmer = document.getElementById('progressFarmer');
+    const chatFarmer = document.getElementById('chatFarmer');
+    uploadFarmer.innerHTML = '<option value="">Pilih Petani</option>';
+    progressFarmer.innerHTML = '<option value="">Pilih Petani</option>';
+    chatFarmer.innerHTML = '<option value="">Pilih Petani</option>';
+    farmers.forEach(farmer => {
+        uploadFarmer.innerHTML += `<option value="${farmer.id}">${farmer.name}</option>`;
+        progressFarmer.innerHTML += `<option value="${farmer.id}">${farmer.name}</option>`;
+        chatFarmer.innerHTML += `<option value="${farmer.id}">${farmer.name}</option>`;
+    });
+}
+
+// Render Progres Tanam
+function renderProgress() {
+    const farmerId = document.getElementById('progressFarmer').value;
+    const landId = document.getElementById('progressLand').value;
+    const timeline = document.getElementById('progressTimeline');
+    timeline.innerHTML = '';
+    if (!farmerId && !landId) {
+        timeline.innerHTML = '<p>Pilih petani atau lahan untuk melihat progres.</p>';
+        return;
+    }
+    const farmerProgress = progressData.filter(p => 
+        (!farmerId || p.farmerId === farmerId) && 
+        (!landId || p.landId === landId)
+    );
+    if (farmerProgress.length === 0) {
+        timeline.innerHTML = '<p>Belum ada progres untuk petani/lahan ini.</p>';
+        return;
+    }
+    farmerProgress.forEach(p => {
+        const land = lands.find(l => l.id === p.landId);
+        timeline.innerHTML += `
+            <div class="timeline-item">
+                <h6>${p.date}: ${p.stage} (Lahan: ${land ? land.location : '-'})</h6>
+                <p>${p.description}</p>
+                <img src="${p.photo}" alt="${p.stage}">
+            </div>
+        `;
+    });
+}
+
+// Render Produk di Marketplace
+function renderProducts() {
+    const tableBody = document.getElementById('productTable');
+    tableBody.innerHTML = '';
+    products.forEach(product => {
+        const farmer = farmers.find(f => f.id === product.farmerId);
+        const land = lands.find(l => l.id === product.landId);
+        tableBody.innerHTML += `
+            <tr>
+                <td>${product.name}</td>
+                <td>Rp ${product.price.toLocaleString()}/kg</td>
+                <td>${product.quantity} kg</td>
+                <td>${farmer ? farmer.name : '-'}</td>
+                <td>${land ? land.location : '-'}</td>
+                <td><img src="${product.qrCode}" alt="QR Code" class="qr-code"></td>
+                <td><button class="btn btn-sm btn-success buy-btn" onclick="buyProduct('${product.id}')">Beli</button></td>
+            </tr>
+        `;
+    });
+}
+
+// Render Transaksi Blockchain
+function renderTransactions() {
+    const transactionList = document.getElementById('transactionList');
+    transactionList.innerHTML = '';
+    transactions.forEach(tx => {
+        const farmer = farmers.find(f => f.id === tx.farmerId);
+        const land = lands.find(l => l.id === tx.landId);
+        transactionList.innerHTML += `
+            <li class="list-group-item">
+                <strong>Transaksi #${tx.id}</strong>: ${tx.product} dibeli oleh ${tx.buyer}<br>
+                Petani: ${farmer ? farmer.name : '-'}, Lahan: ${land ? land.location : '-'}<br>
+                <strong>Hash:</strong> <a href="${tx.explorerLink}" class="blockchain-link" target="_blank">${tx.hash}</a><br>
+                <strong>Tanggal:</strong> ${tx.date}
+            </li>
+        `;
+    });
+}
+
+// Render Chat
+function renderChat() {
+    const farmerId = document.getElementById('chatFarmer').value;
+    const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML = '';
+    if (!farmerId) {
+        chatBox.innerHTML = '<p>Pilih petani untuk memulai chat.</p>';
+        return;
+    }
+    if (!currentBuyer) {
+        chatBox.innerHTML = '<p>Silakan login untuk mengakses chat.</p>';
+        return;
+    }
+    const farmerChats = chats.filter(c => c.farmerId === farmerId);
+    if (farmerChats.length === 0) {
+        chatBox.innerHTML = '<p>Belum ada pesan.</p>';
+        return;
+    }
+    farmerChats.forEach(chat => {
+        chatBox.innerHTML += `
+            <div class="chat-message">
+                <span class="sender">${chat.buyer}:</span> ${chat.message}<br>
+                <small>${chat.timestamp}</small>
+            </div>
+        `;
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Simulasi Tambah Lahan
+document.getElementById('landForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const location = DOMPurify.sanitize(document.getElementById('landLocation').value);
+    const area = parseFloat(DOMPurify.sanitize(document.getElementById('landArea').value));
+    const type = DOMPurify.sanitize(document.getElementById('landType').value);
+    const farmerId = DOMPurify.sanitize(document.getElementById('landFarmer').value);
+    const status = DOMPurify.sanitize(document.getElementById('landStatus').value);
+    if (area <= 0) {
+        alert('Luas lahan harus lebih dari 0!');
+        return;
+    }
+    const newLand = {
+        id: `L${(lands.length + 1).toString().padStart(3, '0')}`,
+        location,
+        area,
+        type,
+        farmerId,
+        status
+    };
+    lands.push(newLand);
+    renderLands();
+    renderProgress();
+    renderProducts();
+    document.getElementById('landForm').reset();
+    alert('Lahan berhasil ditambahkan!');
+});
+
+// Simulasi Login
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = DOMPurify.sanitize(document.getElementById('username').value);
+    const password = DOMPurify.sanitize(document.getElementById('password').value);
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+        currentBuyer = username;
+        alert(`Selamat datang, ${username}!`);
+        bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+        renderChat();
+    } else {
+        alert('Username atau password salah!');
+    }
+});
+
+// Simulasi Tambah Petani
+document.getElementById('farmerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = DOMPurify.sanitize(document.getElementById('farmerName').value);
+    const seed = DOMPurify.sanitize(document.getElementById('farmerSeed').value);
+    const land = DOMPurify.sanitize(document.getElementById('farmerLand').value);
+    const newFarmer = {
+        id: `F${(farmers.length + 1).toString().padStart(3, '0')}`,
+        name,
+        seed,
+        land
+    };
+    farmers.push(newFarmer);
+    renderFarmers();
+    renderLands();
+    renderProgress();
+    renderChat();
+    document.getElementById('farmerForm').reset();
+    alert('Petani berhasil ditambahkan!');
+});
+
+// Simulasi Upload Progres (Anti-XSS)
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const farmerId = DOMPurify.sanitize(document.getElementById('uploadFarmer').value);
+    const landId = DOMPurify.sanitize(document.getElementById('uploadLand').value);
+    const stage = DOMPurify.sanitize(document.getElementById('uploadStage').value);
+    const date = DOMPurify.sanitize(document.getElementById('uploadDate').value);
+    const description = DOMPurify.sanitize(document.getElementById('uploadDescription').value);
+    const photo = DOMPurify.sanitize(document.getElementById('uploadPhoto').value);
+    const newProgress = { farmerId, landId, stage, date, description, photo };
+    progressData.push(newProgress);
+    renderProgress();
+    document.getElementById('uploadForm').reset();
+    alert('Progres berhasil diupload!');
+});
+
+// Simulasi Beli Produk
+function buyProduct(productId) {
+    if (!currentBuyer) {
+        alert('Silakan login untuk membeli produk.');
+        showLogin();
+        return;
+    }
+    const product = products.find(p => p.id === productId);
+    alert(`Berhasil menambahkan ${product.name} ke keranjang! Scan QR untuk bayar.`);
+    const newTx = {
+        id: `TX${(transactions.length + 1).toString().padStart(3, '0')}`,
+        product: `100 kg ${product.name}`,
+        buyer: currentBuyer,
+        farmerId: product.farmerId,
+        landId: product.landId,
+        hash: `0x${Math.random().toString(16).slice(2, 10)}...`,
+        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+        explorerLink: `https://polygonscan.com/tx/0x${Math.random().toString(16).slice(2, 10)}`
+    };
+    transactions.push(newTx);
+    renderTransactions();
+}
+
+// Simulasi Kirim Chat
+document.getElementById('chatForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!currentBuyer) {
+        alert('Silakan login untuk mengirim pesan.');
+        showLogin();
+        return;
+    }
+    const farmerId = DOMPurify.sanitize(document.getElementById('chatFarmer').value);
+    const message = DOMPurify.sanitize(document.getElementById('chatMessage').value);
+    if (!farmerId) {
+        alert('Pilih petani untuk mengirim pesan.');
+        return;
+    }
+    const newChat = {
+        farmerId,
+        buyer: currentBuyer,
+        message,
+        timestamp: new Date().toLocaleString('en-GB')
+    };
+    chats.push(newChat);
+    renderChat();
+    document.getElementById('chatForm').reset();
+});
+
+// Simulasi Refresh Data
+function refreshData() {
+    alert('Memperbarui data... (Data dummy, refresh simulasi!)');
+    renderLands();
+    renderFarmers();
+    renderProgress();
+    renderProducts();
+    renderTransactions();
+    renderChat();
+}
+
+// Buka Modal Login
+function showLogin() {
+    const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+    modal.show();
+}
+
+// Lihat Progres Petani
+function viewProgress(farmerId) {
+    document.getElementById('progressFarmer').value = farmerId;
+    document.getElementById('progressLand').value = '';
+    renderProgress();
+    document.getElementById('progress').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Lihat Detail Lahan
+function viewLand(landId) {
+    document.getElementById('progressFarmer').value = '';
+    document.getElementById('progressLand').value = landId;
+    renderProgress();
+    document.getElementById('progress').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Inisialisasi
+renderLands();
+renderFarmers();
+renderProgress();
+renderProducts();
+renderTransactions();
+renderChat();
