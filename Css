@@ -1,0 +1,79 @@
+body {
+    background-color: #f4f6f9;
+    font-family: Arial, sans-serif;
+}
+.card {
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.timeline {
+    border-left: 4px solid #28a745;
+    padding-left: 20px;
+    position: relative;
+}
+.timeline-item {
+    margin-bottom: 25px;
+    padding-left: 15px;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    width: 16px;
+    height: 16px;
+    background-color: #28a745;
+    border-radius: 50%;
+}
+.timeline-item img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+.blockchain-link {
+    color: #007bff;
+    text-decoration: none;
+}
+.blockchain-link:hover {
+    text-decoration: underline;
+}
+.buy-btn, .refresh-btn, .send-btn {
+    transition: transform 0.2s;
+}
+.buy-btn:hover, .refresh-btn:hover, .send-btn:hover {
+    transform: scale(1.05);
+}
+.navbar-brand {
+    font-weight: bold;
+    color: #28a745 !important;
+}
+.qr-code {
+    max-width: 150px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+}
+.chat-box {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.chat-message {
+    margin-bottom: 10px;
+}
+.chat-message .sender {
+    font-weight: bold;
+}
+.land-details {
+    cursor: pointer;
+    color: #007bff;
+}
+.land-details:hover {
+    text-decoration: underline;
+}
