@@ -1,6 +1,6 @@
 # Nusatani Marketplace
 
-Platform untuk mendukung petani di Sumba Barat, NTT, dengan fitur manajemen lahan, progres tanam, marketplace, blockchain, dan chat. Petani hanya menyediakan tanah, Nusatani mengelola data.
+Platform untuk mendukung petani di Subang, dengan fitur manajemen lahan, progres tanam, marketplace, blockchain, dan chat. Petani hanya menyediakan tanah, Nusatani mengelola data.
 
 ## Fitur
 - **Manajemen Lahan**: Kelola data lahan (lokasi, luas, jenis tanah, status).
